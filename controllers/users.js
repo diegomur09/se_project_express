@@ -2,7 +2,7 @@ const User = require("../models/User");
 
 const getUsers = (req, res) => {
   User.find({})
-    .then((users) => res.status(201).send(users))
+    .then((users) => res.status(200).send(users))
     .catch((err) => {
       console.error(err);
       return res
@@ -37,7 +37,7 @@ const getUser = (req, res) => {
     })
     .catch((err) => {
       console.error(err);
-      if (err.name === "") {
+      if (err.name === "DocumentNotFoundError") {
         return res.status(404).send({ message: "User not found" });
       } else if (err.name === "CastError") {
         return res.status(400).send({ message: "Invalid user ID" });

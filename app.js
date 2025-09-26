@@ -10,6 +10,10 @@ mongoose
   .catch((e) => console.log("DB connection error", e));
 
 app.use(express.json());
+app.use((req, res, next) => {
+  req.user = { _id: "68bddd9d5346c8f5a325411eb" };
+  next();
+});
 
 const routes = require("./routes");
 app.use(routes);
