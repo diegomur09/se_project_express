@@ -1,12 +1,19 @@
-const User = require("../models/User");
+const User = require("../models/user");
+const {
+  STATUS_BAD_REQUEST,
+  STATUS_NOT_FOUND,
+  STATUS_SERVER_ERROR,
+  STATUS_OK,
+  STATUS_CREATED,
+} = require("../utils/errors");
 
 const getUsers = (req, res) => {
   User.find({})
-    .then((users) => res.status(200).send(users))
+    .then((users) => res.status(STATUS_OK).send(users))
     .catch((err) => {
       console.error(err);
       return res
-        .status(500)
+        .status(STATUS_SERVER_ERROR)
         .send({ message: "An error occurred on the server" });
     });
 };
@@ -15,16 +22,15 @@ const createUser = (req, res) => {
   const { name, avatar } = req.body;
 
   User.create({ name, avatar })
-    .then((user) => res.status(201).send(user))
+    .then((user) => res.status(STATUS_CREATED).send(user))
     .catch((err) => {
       console.error(err);
       if (err.name === "ValidationError") {
-        return res.status(400).send({ message: err.message });
-      } else {
-        return res
-          .status(500)
-          .send({ message: "An error occurred on the server" });
+        return res.status(STATUS_BAD_REQUEST).send({ message: err.message });
       }
+      return res
+        .status(STATUS_SERVER_ERROR)
+        .send({ message: "An error occurred on the server" });
     });
 };
 
@@ -33,17 +39,20 @@ const getUser = (req, res) => {
   User.findById(userId)
     .orFail()
     .then((user) => {
-      res.status(200).send(user);
+      res.status(STATUS_OK).send(user);
     })
     .catch((err) => {
       console.error(err);
       if (err.name === "DocumentNotFoundError") {
-        return res.status(404).send({ message: "User not found" });
-      } else if (err.name === "CastError") {
-        return res.status(400).send({ message: "Invalid user ID" });
+        return res.status(STATUS_NOT_FOUND).send({ message: "User not found" });
+      }
+      if (err.name === "CastError") {
+        return res
+          .status(STATUS_BAD_REQUEST)
+          .send({ message: "Invalid user ID" });
       }
       return res
-        .status(500)
+        .status(STATUS_SERVER_ERROR)
         .send({ message: "An error occurred on the server" });
     });
 };
