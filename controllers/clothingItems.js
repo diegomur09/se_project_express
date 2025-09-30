@@ -1,4 +1,5 @@
 const clothingItem = require("../models/clothingItems");
+
 const {
   STATUS_BAD_REQUEST,
   STATUS_NOT_FOUND,
@@ -13,24 +14,25 @@ const createItem = (req, res) => {
   clothingItem
     .create({ name, weather, imageUrl, owner })
     .then((item) => res.send({ data: item }))
-      .catch((e) => {
-        if (e.name === "CastError") {
-          return res
-            .status(STATUS_BAD_REQUEST)
-            .send({ message: "Invalid item data" });
-        }
-        return res.status(STATUS_SERVER_ERROR).send({ message: "Server error" });
-      });
+    .catch((e) => {
+      if (e.name === "CastError") {
+        return res
+          .status(STATUS_BAD_REQUEST)
+          .send({ message: "Invalid item data" });
+      }
+      return res.status(STATUS_SERVER_ERROR).send({ message: "Server error" });
+    });
 };
 
 const getItems = (req, res) => {
   clothingItem
     .find({})
     .then((items) => res.status(STATUS_OK).send(items))
-      .catch(() => res
+    .catch(() =>
+      res
         .status(STATUS_SERVER_ERROR)
         .send({ message: "error on getting items" })
-      );
+    );
 };
 
 const likeItem = (req, res) => {
@@ -41,17 +43,17 @@ const likeItem = (req, res) => {
     .findByIdAndUpdate(itemId, { $addToSet: { likes: userId } }, { new: true })
     .orFail()
     .then((item) => res.status(STATUS_OK).send({ data: item }))
-      .catch((e) => {
-        if (e.name === "DocumentNotFoundError") {
-          return res.status(STATUS_NOT_FOUND).send({ message: "Item not found" });
-        }
-        if (e.name === "CastError") {
-          return res
-            .status(STATUS_BAD_REQUEST)
-            .send({ message: "Invalid like data" });
-        }
-        return res.status(STATUS_SERVER_ERROR).send({ message: "Server error" });
-      });
+    .catch((e) => {
+      if (e.name === "DocumentNotFoundError") {
+        return res.status(STATUS_NOT_FOUND).send({ message: "Item not found" });
+      }
+      if (e.name === "CastError") {
+        return res
+          .status(STATUS_BAD_REQUEST)
+          .send({ message: "Invalid like data" });
+      }
+      return res.status(STATUS_SERVER_ERROR).send({ message: "Server error" });
+    });
 };
 
 const unlikeItem = (req, res) => {
@@ -62,17 +64,17 @@ const unlikeItem = (req, res) => {
     .findByIdAndUpdate(itemId, { $pull: { likes: userId } }, { new: true })
     .orFail()
     .then((item) => res.status(STATUS_OK).send({ data: item }))
-      .catch((e) => {
-        if (e.name === "DocumentNotFoundError") {
-          return res.status(STATUS_NOT_FOUND).send({ message: "Item not found" });
-        }
-        if (e.name === "CastError") {
-          return res
-            .status(STATUS_BAD_REQUEST)
-            .send({ message: "Invalid unlike data" });
-        }
-        return res.status(STATUS_SERVER_ERROR).send({ message: "Server error" });
-      });
+    .catch((e) => {
+      if (e.name === "DocumentNotFoundError") {
+        return res.status(STATUS_NOT_FOUND).send({ message: "Item not found" });
+      }
+      if (e.name === "CastError") {
+        return res
+          .status(STATUS_BAD_REQUEST)
+          .send({ message: "Invalid unlike data" });
+      }
+      return res.status(STATUS_SERVER_ERROR).send({ message: "Server error" });
+    });
 };
 
 const deleteItem = (req, res) => {
@@ -81,17 +83,17 @@ const deleteItem = (req, res) => {
     .findByIdAndDelete(itemId)
     .orFail()
     .then(() => res.status(STATUS_OK).send({}))
-      .catch((e) => {
-        if (e.name === "CastError") {
-          return res
-            .status(STATUS_BAD_REQUEST)
-            .send({ message: "Invalid item ID" });
-        }
-        if (e.name === "DocumentNotFoundError") {
-          return res.status(STATUS_NOT_FOUND).send({ message: "Item not found" });
-        }
-        return res.status(STATUS_SERVER_ERROR).send({ message: "Server error" });
-      });
+    .catch((e) => {
+      if (e.name === "CastError") {
+        return res
+          .status(STATUS_BAD_REQUEST)
+          .send({ message: "Invalid item ID" });
+      }
+      if (e.name === "DocumentNotFoundError") {
+        return res.status(STATUS_NOT_FOUND).send({ message: "Item not found" });
+      }
+      return res.status(STATUS_SERVER_ERROR).send({ message: "Server error" });
+    });
 };
 
 module.exports = { createItem, getItems, likeItem, unlikeItem, deleteItem };
