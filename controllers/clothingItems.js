@@ -15,7 +15,7 @@ const createItem = (req, res) => {
     .create({ name, weather, imageUrl, owner })
     .then((item) => res.send({ data: item }))
     .catch((e) => {
-      if (e.name === "CastError") {
+      if (e.name === "ValidationError") {
         return res
           .status(STATUS_BAD_REQUEST)
           .send({ message: "Invalid item data" });
