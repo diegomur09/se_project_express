@@ -1,6 +1,8 @@
 /* eslint-disable no-console */
 const express = require("express");
 const mongoose = require("mongoose");
+const cors = require("cors");
+const { login, createUser } = require("./controllers/users");
 
 const app = express();
 const { PORT = 3001 } = process.env;
@@ -15,10 +17,11 @@ if (process.env.NODE_ENV !== "test") {
 }
 
 app.use(express.json());
-app.use((req, res, next) => {
-  req.user = { _id: "68bddd9d5346c8f5a325411eb" };
-  next();
-});
+app.use(cors());
+
+// Global authentication routes (no auth required)
+app.post('/signin', login);
+app.post('/signup', createUser);
 
 const routes = require("./routes");
 

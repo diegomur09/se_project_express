@@ -1,4 +1,5 @@
 const router = require("express").Router();
+const auth = require("../middlewares/auth");
 
 const {
   createItem,
@@ -8,10 +9,13 @@ const {
   deleteItem,
 } = require("../controllers/clothingItems");
 
-router.post("/", createItem);
+// Public route - no auth required
 router.get("/", getItems);
-router.put("/:itemId/likes", likeItem);
-router.delete("/:itemId/likes", unlikeItem);
-router.delete("/:itemId", deleteItem);
+
+// Protected routes - auth required
+router.post("/", auth, createItem);
+router.put("/:itemId/likes", auth, likeItem);
+router.delete("/:itemId/likes", auth, unlikeItem);
+router.delete("/:itemId", auth, deleteItem);
 
 module.exports = router;

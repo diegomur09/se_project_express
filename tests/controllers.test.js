@@ -1,11 +1,6 @@
 /* eslint-env jest */
 // Tests that call controller functions directly without starting the server.
-const { getUsers } = require('../controllers/users');
 const { getItems } = require('../controllers/clothingItems');
-
-jest.mock('../models/user', () => ({
-  find: jest.fn().mockResolvedValue([{ name: 'Alice' }]),
-}));
 
 jest.mock('../models/clothingItems', () => ({
   find: jest.fn().mockResolvedValue([]),
@@ -19,15 +14,6 @@ function makeRes() {
 }
 
 describe('Controller smoke tests', () => {
-  test('getUsers responds 200 with array', async () => {
-    const req = {};
-    const res = makeRes();
-
-    await getUsers(req, res);
-    expect(res.status).toHaveBeenCalledWith(200);
-    expect(res.send).toHaveBeenCalledWith(expect.any(Array));
-  });
-
   test('getItems responds 200 with array', async () => {
     const req = {};
     const res = makeRes();

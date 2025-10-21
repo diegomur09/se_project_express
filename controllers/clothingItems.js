@@ -2,6 +2,7 @@ const clothingItem = require("../models/clothingItems");
 
 const {
   STATUS_BAD_REQUEST,
+  STATUS_FORBIDDEN,
   STATUS_NOT_FOUND,
   STATUS_SERVER_ERROR,
   STATUS_OK,
@@ -79,9 +80,23 @@ const unlikeItem = (req, res) => {
 
 const deleteItem = (req, res) => {
   const { itemId } = req.params;
+  const userId = req.user._id;
+
+  // First find the item to check ownership
   clothingItem
-    .findByIdAndDelete(itemId)
+    .findById(itemId)
     .orFail()
+    .then((item) => {
+      // Check if current user is the owner of the item
+      if (item.owner.toString() !== userId) {
+        return res
+          .status(STATUS_FORBIDDEN)
+          .send({ message: "You can only delete your own items" });
+      }
+
+      // If user is the owner, delete the item
+      return clothingItem.findByIdAndDelete(itemId);
+    })
     .then(() => res.status(STATUS_OK).send({}))
     .catch((e) => {
       if (e.name === "CastError") {
