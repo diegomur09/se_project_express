@@ -20,32 +20,35 @@ const userSchema = new mongoose.Schema({
       validator(email) {
         return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
       },
-      message: "Please enter a valid email address"
-    }
+      message: "Please enter a valid email address",
+    },
   },
   password: {
     type: String,
     required: true,
     minlength: 8,
-    select: false  // Exclude password from query results by default
-  }
+    select: false, // Exclude password from query results by default
+  },
 });
 
 // Custom static method for finding user by credentials
-userSchema.statics.findUserByCredentials = function findUserByCredentials(email, password) {
-  return this.findOne({ email }).select('+password')
+userSchema.statics.findUserByCredentials = function findUserByCredentials(
+  email,
+  password
+) {
+  return this.findOne({ email })
+    .select("+password")
     .then((user) => {
       if (!user) {
-        return Promise.reject(new Error('Incorrect email or password'));
+        return Promise.reject(new Error("Incorrect email or password"));
       }
 
-      return bcrypt.compare(password, user.password)
-        .then((matched) => {
-          if (!matched) {
-            return Promise.reject(new Error('Incorrect email or password'));
-          }
-          return user;
-        });
+      return bcrypt.compare(password, user.password).then((matched) => {
+        if (!matched) {
+          return Promise.reject(new Error("Incorrect email or password"));
+        }
+        return user;
+      });
     });
 };
 
