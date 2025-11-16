@@ -23,6 +23,14 @@ app.use(cors());
 app.post('/signin', login);
 app.post('/signup', createUser);
 
+// Temporary user for testing (will be replaced by auth middleware in production)
+app.use((req, res, next) => {
+  req.user = {
+    _id: "5d8b8592978f8bd833ca8133"
+  };
+  next();
+});
+
 const routes = require("./routes");
 
 app.use(routes);
