@@ -3,7 +3,6 @@ const auth = require("../middlewares/auth");
 const {
   getCurrentUser,
   updateProfile,
-  createUser,
   createTestUser,
   getUsers,
   getUser,
