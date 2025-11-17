@@ -16,6 +16,25 @@ const {
 const createUser = (req, res) => {
   const { name, avatar, email, password } = req.body;
 
+  // Validate email and password before hashing
+  if (!email) {
+    return res.status(STATUS_BAD_REQUEST).send({
+      message: "Path `email` is required.",
+    });
+  }
+
+  if (!password) {
+    return res.status(STATUS_BAD_REQUEST).send({
+      message: "Path `password` is required.",
+    });
+  }
+
+  if (password.length < 8) {
+    return res.status(STATUS_BAD_REQUEST).send({
+      message: "Path `password` is shorter than the minimum allowed length (8).",
+    });
+  }
+
   bcrypt
     .hash(password, 10)
     .then((hashedPassword) =>
@@ -48,6 +67,8 @@ const createUser = (req, res) => {
         .status(STATUS_SERVER_ERROR)
         .send({ message: "An error occurred on the server" });
     });
+
+  return undefined; // ESLint consistent-return requirement
 };
 
 const login = (req, res) => {
