@@ -153,84 +153,9 @@ const updateProfile = (req, res) => {
     });
 };
 
-const createTestUser = (req, res) => {
-  const { name, avatar } = req.body;
-
-  const testEmail = `test_${Date.now()}_${Math.random()
-    .toString(36)
-    .substr(2, 9)}@example.com`;
-  const testPassword = "dummypassword123";
-
-  bcrypt
-    .hash(testPassword, 10)
-    .then((hashedPassword) =>
-      User.create({
-        name,
-        avatar,
-        email: testEmail,
-        password: hashedPassword,
-      })
-    )
-    .then((user) => {
-      res.status(STATUS_CREATED).send({
-        _id: user._id,
-        name: user.name,
-        avatar: user.avatar,
-      });
-    })
-    .catch((err) => {
-      console.error("User creation error:", err);
-
-      if (err.name === "ValidationError") {
-        return res.status(STATUS_BAD_REQUEST).send({ message: err.message });
-      }
-
-      return res
-        .status(STATUS_SERVER_ERROR)
-        .send({ message: "An error occurred on the server" });
-    });
-};
-
-const getUsers = (req, res) => {
-  User.find({})
-    .then((users) => res.status(STATUS_OK).send(users))
-    .catch((err) => {
-      console.error(err);
-      return res
-        .status(STATUS_SERVER_ERROR)
-        .send({ message: "An error occurred on the server" });
-    });
-};
-
-const getUser = (req, res) => {
-  const { userId } = req.params;
-  User.findById(userId)
-    .orFail()
-    .then((user) => {
-      res.status(STATUS_OK).send(user);
-    })
-    .catch((err) => {
-      console.error(err);
-      if (err.name === "DocumentNotFoundError") {
-        return res.status(STATUS_NOT_FOUND).send({ message: "User not found" });
-      }
-      if (err.name === "CastError") {
-        return res
-          .status(STATUS_BAD_REQUEST)
-          .send({ message: "Invalid user ID" });
-      }
-      return res
-        .status(STATUS_SERVER_ERROR)
-        .send({ message: "An error occurred on the server" });
-    });
-};
-
 module.exports = {
   createUser,
   login,
   getCurrentUser,
   updateProfile,
-  createTestUser,
-  getUsers,
-  getUser,
 };
