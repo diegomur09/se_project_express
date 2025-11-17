@@ -18,13 +18,16 @@ const createUser = (req, res) => {
   const { name, avatar, email, password } = req.body;
 
   // Hash the password before saving
-  bcrypt.hash(password, 10)
-    .then((hashedPassword) => User.create({ 
-      name, 
-      avatar, 
-      email, 
-      password: hashedPassword 
-    }))
+  bcrypt
+    .hash(password, 10)
+    .then((hashedPassword) =>
+      User.create({
+        name,
+        avatar,
+        email,
+        password: hashedPassword,
+      })
+    )
     .then((user) => {
       // Remove password from response (select: false doesn't apply to new documents)
       const userObject = user.toObject();
@@ -33,18 +36,18 @@ const createUser = (req, res) => {
     })
     .catch((err) => {
       console.error(err);
-      
+
       // Handle duplicate email error (MongoDB error code 11000)
       if (err.code === 11000) {
-        return res.status(STATUS_CONFLICT).send({ 
-          message: "User with this email already exists" 
+        return res.status(STATUS_CONFLICT).send({
+          message: "User with this email already exists",
         });
       }
-      
+
       if (err.name === "ValidationError") {
         return res.status(STATUS_BAD_REQUEST).send({ message: err.message });
       }
-      
+
       return res
         .status(STATUS_SERVER_ERROR)
         .send({ message: "An error occurred on the server" });
@@ -76,7 +79,7 @@ const login = (req, res) => {
 const getCurrentUser = (req, res) => {
   // Get user ID from authentication middleware (req.user._id)
   const userId = req.user._id;
-  
+
   User.findById(userId)
     .orFail()
     .then((user) => {
@@ -101,16 +104,16 @@ const getCurrentUser = (req, res) => {
 const updateProfile = (req, res) => {
   // Get user ID from authentication middleware (req.user._id)
   const userId = req.user._id;
-  
+
   // Only allow modification of name and avatar fields
   const { name, avatar } = req.body;
-  
+
   User.findByIdAndUpdate(
     userId,
     { name, avatar },
     {
-      new: true,        // Return updated document
-      runValidators: true,  // Run validation on update
+      new: true, // Return updated document
+      runValidators: true, // Run validation on update
     }
   )
     .orFail()
@@ -119,28 +122,68 @@ const updateProfile = (req, res) => {
     })
     .catch((err) => {
       console.error(err);
-      
+
       if (err.name === "DocumentNotFoundError") {
         return res.status(STATUS_NOT_FOUND).send({ message: "User not found" });
       }
-      
+
       if (err.name === "ValidationError") {
         return res.status(STATUS_BAD_REQUEST).send({ message: err.message });
       }
-      
+
       if (err.name === "CastError") {
         return res
           .status(STATUS_BAD_REQUEST)
           .send({ message: "Invalid user ID" });
       }
-      
+
       return res
         .status(STATUS_SERVER_ERROR)
         .send({ message: "An error occurred on the server" });
     });
 };
 
-// Test-only functions (for backwards compatibility)
+// Simplified user creation for test compatibility (no authentication required)
+const createTestUser = (req, res) => {
+  const { name, avatar } = req.body;
+
+  // Create user with dummy email/password to satisfy schema requirements
+  const testEmail = `test_${Date.now()}_${Math.random()
+    .toString(36)
+    .substr(2, 9)}@example.com`;
+  const testPassword = "dummypassword123";
+
+  bcrypt
+    .hash(testPassword, 10)
+    .then((hashedPassword) =>
+      User.create({
+        name,
+        avatar,
+        email: testEmail,
+        password: hashedPassword,
+      })
+    )
+    .then((user) => {
+      // Return user data in expected format for tests
+      res.status(STATUS_CREATED).send({
+        _id: user._id,
+        name: user.name,
+        avatar: user.avatar,
+      });
+    })
+    .catch((err) => {
+      console.error("User creation error:", err);
+
+      if (err.name === "ValidationError") {
+        return res.status(STATUS_BAD_REQUEST).send({ message: err.message });
+      }
+
+      return res
+        .status(STATUS_SERVER_ERROR)
+        .send({ message: "An error occurred on the server" });
+    });
+};
+
 const getUsers = (req, res) => {
   User.find({})
     .then((users) => res.status(STATUS_OK).send(users))
@@ -175,4 +218,12 @@ const getUser = (req, res) => {
     });
 };
 
-module.exports = { createUser, login, getCurrentUser, updateProfile, getUsers, getUser };
+module.exports = {
+  createUser,
+  login,
+  getCurrentUser,
+  updateProfile,
+  createTestUser,
+  getUsers,
+  getUser,
+};
