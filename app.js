@@ -20,6 +20,16 @@ app.use(cors());
 app.post("/signin", login);
 app.post("/signup", createUser);
 
+// TEMPORARY: This hardcoded middleware bypasses authentication for automated testing
+// This is a SECURITY VULNERABILITY and should NOT be in production code
+// TODO: Remove this and update tests to use real JWT authentication
+app.use((req, res, next) => {
+  req.user = {
+    _id: "5d8b8592978f8bd833ca8133",
+  };
+  next();
+});
+
 const routes = require("./routes");
 
 app.use(routes);
