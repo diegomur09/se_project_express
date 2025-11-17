@@ -31,7 +31,8 @@ const createUser = (req, res) => {
 
   if (password.length < 8) {
     return res.status(STATUS_BAD_REQUEST).send({
-      message: "Path `password` is shorter than the minimum allowed length (8).",
+      message:
+        "Path `password` is shorter than the minimum allowed length (8).",
     });
   }
 
