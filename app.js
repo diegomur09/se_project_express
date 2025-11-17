@@ -2,7 +2,7 @@
 const express = require("express");
 const mongoose = require("mongoose");
 const cors = require("cors");
-const { login } = require("./controllers/users");
+const { login, createUser } = require("./controllers/users");
 
 const app = express();
 const { PORT = 3001 } = process.env;
@@ -18,16 +18,7 @@ app.use(express.json());
 app.use(cors());
 
 app.post("/signin", login);
-
-// TEMPORARY: This hardcoded middleware bypasses authentication for automated testing
-// This is a SECURITY VULNERABILITY and should NOT be in production code
-// TODO: Remove this and update tests to use real JWT authentication
-app.use((req, res, next) => {
-  req.user = {
-    _id: "5d8b8592978f8bd833ca8133",
-  };
-  next();
-});
+app.post("/signup", createUser);
 
 const routes = require("./routes");
 

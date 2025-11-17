@@ -154,47 +154,9 @@ const updateProfile = (req, res) => {
     });
 };
 
-// TEMPORARY: These endpoints are for testing only and don't match the API spec
-const getUsers = (req, res) => {
-  User.find({})
-    .then((users) => res.status(STATUS_OK).send(users))
-    .catch((err) => {
-      console.error(err);
-      return res
-        .status(STATUS_SERVER_ERROR)
-        .send({ message: "An error occurred on the server" });
-    });
-};
-
-const getUser = (req, res) => {
-  const { userId } = req.params;
-
-  User.findById(userId)
-    .orFail()
-    .then((user) => {
-      res.status(STATUS_OK).send(user);
-    })
-    .catch((err) => {
-      console.error(err);
-      if (err.name === "DocumentNotFoundError") {
-        return res.status(STATUS_NOT_FOUND).send({ message: "User not found" });
-      }
-      if (err.name === "CastError") {
-        return res
-          .status(STATUS_BAD_REQUEST)
-          .send({ message: "Invalid user ID" });
-      }
-      return res
-        .status(STATUS_SERVER_ERROR)
-        .send({ message: "An error occurred on the server" });
-    });
-};
-
 module.exports = {
   createUser,
   login,
   getCurrentUser,
   updateProfile,
-  getUsers,
-  getUser,
 };
