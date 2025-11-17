@@ -2,7 +2,7 @@
 const express = require("express");
 const mongoose = require("mongoose");
 const cors = require("cors");
-const { login, createUser } = require("./controllers/users");
+const { login } = require("./controllers/users");
 
 const app = express();
 const { PORT = 3001 } = process.env;
@@ -18,7 +18,6 @@ app.use(express.json());
 app.use(cors());
 
 app.post("/signin", login);
-app.post("/signup", createUser);
 
 // TEMPORARY: This hardcoded middleware bypasses authentication for automated testing
 // This is a SECURITY VULNERABILITY and should NOT be in production code
