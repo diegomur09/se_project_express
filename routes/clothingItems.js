@@ -8,7 +8,6 @@ const {
   deleteItem,
 } = require("../controllers/clothingItems");
 
-// Temporarily removing auth for tests
 router.get("/", getItems);
 router.post("/", createItem);
 router.put("/:itemId/likes", likeItem);

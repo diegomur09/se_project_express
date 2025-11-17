@@ -1,4 +1,3 @@
-// User controller functions for authentication and profile management
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
 const User = require("../models/user");
@@ -17,7 +16,6 @@ const {
 const createUser = (req, res) => {
   const { name, avatar, email, password } = req.body;
 
-  // Hash the password before saving
   bcrypt
     .hash(password, 10)
     .then((hashedPassword) =>
@@ -29,7 +27,6 @@ const createUser = (req, res) => {
       })
     )
     .then((user) => {
-      // Remove password from response (select: false doesn't apply to new documents)
       const userObject = user.toObject();
       delete userObject.password;
       res.status(STATUS_CREATED).send(userObject);
@@ -37,7 +34,6 @@ const createUser = (req, res) => {
     .catch((err) => {
       console.error(err);
 
-      // Handle duplicate email error (MongoDB error code 11000)
       if (err.code === 11000) {
         return res.status(STATUS_CONFLICT).send({
           message: "User with this email already exists",
@@ -59,17 +55,14 @@ const login = (req, res) => {
 
   User.findUserByCredentials(email, password)
     .then((user) => {
-      // Create JWT token with user ID, expires in 7 days
       const token = jwt.sign({ _id: user._id }, JWT_SECRET, {
         expiresIn: "7d",
       });
 
-      // Send token in response body
       res.status(STATUS_OK).send({ token });
     })
     .catch((err) => {
       console.error(err);
-      // Return 401 for incorrect email or password
       return res
         .status(STATUS_UNAUTHORIZED)
         .send({ message: "Incorrect email or password" });
@@ -77,7 +70,6 @@ const login = (req, res) => {
 };
 
 const getCurrentUser = (req, res) => {
-  // Get user ID from authentication middleware (req.user._id)
   const userId = req.user._id;
 
   User.findById(userId)
@@ -102,18 +94,15 @@ const getCurrentUser = (req, res) => {
 };
 
 const updateProfile = (req, res) => {
-  // Get user ID from authentication middleware (req.user._id)
   const userId = req.user._id;
-
-  // Only allow modification of name and avatar fields
   const { name, avatar } = req.body;
 
   User.findByIdAndUpdate(
     userId,
     { name, avatar },
     {
-      new: true, // Return updated document
-      runValidators: true, // Run validation on update
+      new: true,
+      runValidators: true,
     }
   )
     .orFail()
@@ -143,11 +132,9 @@ const updateProfile = (req, res) => {
     });
 };
 
-// Simplified user creation for test compatibility (no authentication required)
 const createTestUser = (req, res) => {
   const { name, avatar } = req.body;
 
-  // Create user with dummy email/password to satisfy schema requirements
   const testEmail = `test_${Date.now()}_${Math.random()
     .toString(36)
     .substr(2, 9)}@example.com`;
@@ -164,7 +151,6 @@ const createTestUser = (req, res) => {
       })
     )
     .then((user) => {
-      // Return user data in expected format for tests
       res.status(STATUS_CREATED).send({
         _id: user._id,
         name: user.name,

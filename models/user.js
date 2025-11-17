@@ -27,11 +27,10 @@ const userSchema = new mongoose.Schema({
     type: String,
     required: true,
     minlength: 8,
-    select: false, // Exclude password from query results by default
+    select: false,
   },
 });
 
-// Custom static method for finding user by credentials
 userSchema.statics.findUserByCredentials = function findUserByCredentials(
   email,
   password
