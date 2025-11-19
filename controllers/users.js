@@ -75,7 +75,13 @@ const createUser = (req, res) => {
 const login = (req, res) => {
   const { email, password } = req.body;
 
-  User.findUserByCredentials(email, password)
+  if (!email || !password) {
+    return res.status(STATUS_BAD_REQUEST).send({
+      message: "Email and password are required",
+    });
+  }
+
+  return User.findUserByCredentials(email, password)
     .then((user) => {
       const token = jwt.sign({ _id: user._id }, JWT_SECRET, {
         expiresIn: "7d",
@@ -85,9 +91,16 @@ const login = (req, res) => {
     })
     .catch((err) => {
       console.error(err);
+
+      if (err.message === "Incorrect email or password") {
+        return res
+          .status(STATUS_UNAUTHORIZED)
+          .send({ message: "Incorrect email or password" });
+      }
+
       return res
-        .status(STATUS_UNAUTHORIZED)
-        .send({ message: "Incorrect email or password" });
+        .status(STATUS_SERVER_ERROR)
+        .send({ message: "An error occurred on the server" });
     });
 };
 

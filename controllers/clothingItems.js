@@ -95,9 +95,10 @@ const deleteItem = (req, res) => {
       }
 
       // If user is the owner, delete the item
-      return clothingItem.findByIdAndDelete(itemId);
+      return clothingItem
+        .findByIdAndDelete(itemId)
+        .then(() => res.status(STATUS_OK).send({}));
     })
-    .then(() => res.status(STATUS_OK).send({}))
     .catch((e) => {
       if (e.name === "CastError") {
         return res
