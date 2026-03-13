@@ -13,6 +13,26 @@ const {
   STATUS_CREATED,
 } = require("../utils/errors");
 
+const createUserLegacy = (req, res) => {
+  const { name, avatar } = req.body;
+
+  User.create({ name, avatar })
+    .then((user) => {
+      res.status(STATUS_CREATED).send(user);
+    })
+    .catch((err) => {
+      console.error(err);
+
+      if (err.name === "ValidationError") {
+        return res.status(STATUS_BAD_REQUEST).send({ message: err.message });
+      }
+
+      return res
+        .status(STATUS_SERVER_ERROR)
+        .send({ message: "An error occurred on the server" });
+    });
+};
+
 const createUser = (req, res) => {
   const { name, avatar, email, password } = req.body;
 
@@ -70,6 +90,42 @@ const createUser = (req, res) => {
     });
 
   return undefined; // ESLint consistent-return requirement
+};
+
+const getUsers = (req, res) => {
+  User.find({})
+    .then((users) => res.status(STATUS_OK).send(users))
+    .catch((err) => {
+      console.error(err);
+      res
+        .status(STATUS_SERVER_ERROR)
+        .send({ message: "An error occurred on the server" });
+    });
+};
+
+const getUserById = (req, res) => {
+  const { userId } = req.params;
+
+  User.findById(userId)
+    .orFail()
+    .then((user) => {
+      res.status(STATUS_OK).send(user);
+    })
+    .catch((err) => {
+      console.error(err);
+
+      if (err.name === "DocumentNotFoundError") {
+        return res.status(STATUS_NOT_FOUND).send({ message: "User not found" });
+      }
+
+      if (err.name === "CastError") {
+        return res.status(STATUS_BAD_REQUEST).send({ message: "Invalid user ID" });
+      }
+
+      return res
+        .status(STATUS_SERVER_ERROR)
+        .send({ message: "An error occurred on the server" });
+    });
 };
 
 const login = (req, res) => {
@@ -168,8 +224,11 @@ const updateProfile = (req, res) => {
 };
 
 module.exports = {
+  createUserLegacy,
   createUser,
   login,
+  getUsers,
+  getUserById,
   getCurrentUser,
   updateProfile,
 };

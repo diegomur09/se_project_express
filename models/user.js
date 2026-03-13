@@ -15,16 +15,17 @@ const userSchema = new mongoose.Schema({
   },
   email: {
     type: String,
-    required: true,
+    required: false,
     unique: true,
+    sparse: true,
     validate: {
-      validator: (v) => validator.isEmail(v),
+      validator: (v) => !v || validator.isEmail(v),
       message: "Please enter a valid email address",
     },
   },
   password: {
     type: String,
-    required: true,
+    required: false,
     select: false,
   },
 });
