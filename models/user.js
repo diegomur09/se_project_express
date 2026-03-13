@@ -7,7 +7,6 @@ const userSchema = new mongoose.Schema({
   avatar: {
     type: String,
     required: [true, "The avatar field is required."],
-    default: "https://api.dicebear.com/9.x/initials/svg?seed=WTWR",
     validate: {
       validator: (v) => validator.isURL(v),
       message: "You must enter a valid URL",
