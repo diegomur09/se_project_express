@@ -25,11 +25,14 @@
   "homepage": "https://github.com/diegomur09/se_project_express#readme",
   "dependencies": {
     "bcryptjs": "^3.0.2",
+    "celebrate": "^15.0.3",
     "cors": "^2.8.5",
     "express": "^5.1.0",
+    "express-winston": "^4.2.0",
     "jsonwebtoken": "^9.0.2",
     "mongoose": "^8.18.1",
-    "validator": "^13.15.15"
+    "validator": "^13.15.35",
+    "winston": "^3.19.0"
   },
   "devDependencies": {
     "cross-env": "^7.0.3",

@@ -2,18 +2,17 @@ const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
 const User = require("../models/user");
 const { JWT_SECRET } = require("../utils/config");
+const BadRequestError = require("../errors/bad-request-error");
+const UnauthorizedError = require("../errors/unauthorized-error");
+const NotFoundError = require("../errors/not-found-error");
+const ConflictError = require("../errors/conflict-error");
 
 const {
-  STATUS_BAD_REQUEST,
-  STATUS_UNAUTHORIZED,
-  STATUS_NOT_FOUND,
-  STATUS_CONFLICT,
-  STATUS_SERVER_ERROR,
   STATUS_OK,
   STATUS_CREATED,
 } = require("../utils/errors");
 
-const createUserLegacy = (req, res) => {
+const createUserLegacy = (req, res, next) => {
   const { name, avatar } = req.body;
 
   User.create({ name, avatar })
@@ -21,42 +20,35 @@ const createUserLegacy = (req, res) => {
       res.status(STATUS_CREATED).send(user);
     })
     .catch((err) => {
-      console.error(err);
-
       if (err.name === "ValidationError") {
-        return res.status(STATUS_BAD_REQUEST).send({ message: err.message });
+        return next(new BadRequestError(err.message));
       }
 
-      return res
-        .status(STATUS_SERVER_ERROR)
-        .send({ message: "An error occurred on the server" });
+      return next(err);
     });
 };
 
-const createUser = (req, res) => {
+const createUser = (req, res, next) => {
   const { name, avatar, email, password } = req.body;
 
   // Validate email and password before hashing
   if (!email) {
-    return res.status(STATUS_BAD_REQUEST).send({
-      message: "Path `email` is required.",
-    });
+    return next(new BadRequestError("Path `email` is required."));
   }
 
   if (!password) {
-    return res.status(STATUS_BAD_REQUEST).send({
-      message: "Path `password` is required.",
-    });
+    return next(new BadRequestError("Path `password` is required."));
   }
 
   if (password.length < 8) {
-    return res.status(STATUS_BAD_REQUEST).send({
-      message:
-        "Path `password` is shorter than the minimum allowed length (8).",
-    });
+    return next(
+      new BadRequestError(
+        "Path `password` is shorter than the minimum allowed length (8)."
+      )
+    );
   }
 
-  bcrypt
+  return bcrypt
     .hash(password, 10)
     .then((hashedPassword) =>
       User.create({
@@ -72,38 +64,25 @@ const createUser = (req, res) => {
       res.status(STATUS_CREATED).send(userObject);
     })
     .catch((err) => {
-      console.error(err);
-
       if (err.code === 11000) {
-        return res.status(STATUS_CONFLICT).send({
-          message: "User with this email already exists",
-        });
+        return next(new ConflictError("User with this email already exists"));
       }
 
       if (err.name === "ValidationError") {
-        return res.status(STATUS_BAD_REQUEST).send({ message: err.message });
+        return next(new BadRequestError(err.message));
       }
 
-      return res
-        .status(STATUS_SERVER_ERROR)
-        .send({ message: "An error occurred on the server" });
+      return next(err);
     });
-
-  return undefined; // ESLint consistent-return requirement
 };
 
-const getUsers = (req, res) => {
+const getUsers = (req, res, next) => {
   User.find({})
     .then((users) => res.status(STATUS_OK).send(users))
-    .catch((err) => {
-      console.error(err);
-      res
-        .status(STATUS_SERVER_ERROR)
-        .send({ message: "An error occurred on the server" });
-    });
+    .catch(next);
 };
 
-const getUserById = (req, res) => {
+const getUserById = (req, res, next) => {
   const { userId } = req.params;
 
   User.findById(userId)
@@ -112,29 +91,23 @@ const getUserById = (req, res) => {
       res.status(STATUS_OK).send(user);
     })
     .catch((err) => {
-      console.error(err);
-
       if (err.name === "DocumentNotFoundError") {
-        return res.status(STATUS_NOT_FOUND).send({ message: "User not found" });
+        return next(new NotFoundError("User not found"));
       }
 
       if (err.name === "CastError") {
-        return res.status(STATUS_BAD_REQUEST).send({ message: "Invalid user ID" });
+        return next(new BadRequestError("Invalid user ID"));
       }
 
-      return res
-        .status(STATUS_SERVER_ERROR)
-        .send({ message: "An error occurred on the server" });
+      return next(err);
     });
 };
 
-const login = (req, res) => {
+const login = (req, res, next) => {
   const { email, password } = req.body;
 
   if (!email || !password) {
-    return res.status(STATUS_BAD_REQUEST).send({
-      message: "Email and password are required",
-    });
+    return next(new BadRequestError("Email and password are required"));
   }
 
   return User.findUserByCredentials(email, password)
@@ -146,21 +119,15 @@ const login = (req, res) => {
       res.status(STATUS_OK).send({ token });
     })
     .catch((err) => {
-      console.error(err);
-
       if (err.message === "Incorrect email or password") {
-        return res
-          .status(STATUS_UNAUTHORIZED)
-          .send({ message: "Incorrect email or password" });
+        return next(new UnauthorizedError("Incorrect email or password"));
       }
 
-      return res
-        .status(STATUS_SERVER_ERROR)
-        .send({ message: "An error occurred on the server" });
+      return next(err);
     });
 };
 
-const getCurrentUser = (req, res) => {
+const getCurrentUser = (req, res, next) => {
   const userId = req.user._id;
 
   User.findById(userId)
@@ -169,22 +136,17 @@ const getCurrentUser = (req, res) => {
       res.status(STATUS_OK).send(user);
     })
     .catch((err) => {
-      console.error(err);
       if (err.name === "DocumentNotFoundError") {
-        return res.status(STATUS_NOT_FOUND).send({ message: "User not found" });
+        return next(new NotFoundError("User not found"));
       }
       if (err.name === "CastError") {
-        return res
-          .status(STATUS_BAD_REQUEST)
-          .send({ message: "Invalid user ID" });
+        return next(new BadRequestError("Invalid user ID"));
       }
-      return res
-        .status(STATUS_SERVER_ERROR)
-        .send({ message: "An error occurred on the server" });
+      return next(err);
     });
 };
 
-const updateProfile = (req, res) => {
+const updateProfile = (req, res, next) => {
   const userId = req.user._id;
   const { name, avatar } = req.body;
 
@@ -201,25 +163,19 @@ const updateProfile = (req, res) => {
       res.status(STATUS_OK).send(user);
     })
     .catch((err) => {
-      console.error(err);
-
       if (err.name === "DocumentNotFoundError") {
-        return res.status(STATUS_NOT_FOUND).send({ message: "User not found" });
+        return next(new NotFoundError("User not found"));
       }
 
       if (err.name === "ValidationError") {
-        return res.status(STATUS_BAD_REQUEST).send({ message: err.message });
+        return next(new BadRequestError(err.message));
       }
 
       if (err.name === "CastError") {
-        return res
-          .status(STATUS_BAD_REQUEST)
-          .send({ message: "Invalid user ID" });
+        return next(new BadRequestError("Invalid user ID"));
       }
 
-      return res
-        .status(STATUS_SERVER_ERROR)
-        .send({ message: "An error occurred on the server" });
+      return next(err);
     });
 };
 

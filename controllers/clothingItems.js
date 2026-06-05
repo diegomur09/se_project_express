@@ -1,14 +1,13 @@
 const clothingItem = require("../models/clothingItems");
+const BadRequestError = require("../errors/bad-request-error");
+const ForbiddenError = require("../errors/forbidden-error");
+const NotFoundError = require("../errors/not-found-error");
 
 const {
-  STATUS_BAD_REQUEST,
-  STATUS_FORBIDDEN,
-  STATUS_NOT_FOUND,
-  STATUS_SERVER_ERROR,
   STATUS_OK,
 } = require("../utils/errors");
 
-const createItem = (req, res) => {
+const createItem = (req, res, next) => {
   const { name, weather, imageUrl } = req.body;
   const owner = req.user._id;
 
@@ -17,26 +16,20 @@ const createItem = (req, res) => {
     .then((item) => res.send({ data: item }))
     .catch((e) => {
       if (e.name === "ValidationError") {
-        return res
-          .status(STATUS_BAD_REQUEST)
-          .send({ message: "Invalid item data" });
+        return next(new BadRequestError("Invalid item data"));
       }
-      return res.status(STATUS_SERVER_ERROR).send({ message: "Server error" });
+      return next(e);
     });
 };
 
-const getItems = (req, res) => {
+const getItems = (req, res, next) => {
   clothingItem
     .find({})
     .then((items) => res.status(STATUS_OK).send(items))
-    .catch(() =>
-      res
-        .status(STATUS_SERVER_ERROR)
-        .send({ message: "error on getting items" })
-    );
+    .catch(next);
 };
 
-const likeItem = (req, res) => {
+const likeItem = (req, res, next) => {
   const { itemId } = req.params;
   const userId = req.user._id;
 
@@ -46,18 +39,16 @@ const likeItem = (req, res) => {
     .then((item) => res.status(STATUS_OK).send({ data: item }))
     .catch((e) => {
       if (e.name === "DocumentNotFoundError") {
-        return res.status(STATUS_NOT_FOUND).send({ message: "Item not found" });
+        return next(new NotFoundError("Item not found"));
       }
       if (e.name === "CastError") {
-        return res
-          .status(STATUS_BAD_REQUEST)
-          .send({ message: "Invalid like data" });
+        return next(new BadRequestError("Invalid item ID"));
       }
-      return res.status(STATUS_SERVER_ERROR).send({ message: "Server error" });
+      return next(e);
     });
 };
 
-const unlikeItem = (req, res) => {
+const unlikeItem = (req, res, next) => {
   const { itemId } = req.params;
   const userId = req.user._id;
 
@@ -67,18 +58,16 @@ const unlikeItem = (req, res) => {
     .then((item) => res.status(STATUS_OK).send({ data: item }))
     .catch((e) => {
       if (e.name === "DocumentNotFoundError") {
-        return res.status(STATUS_NOT_FOUND).send({ message: "Item not found" });
+        return next(new NotFoundError("Item not found"));
       }
       if (e.name === "CastError") {
-        return res
-          .status(STATUS_BAD_REQUEST)
-          .send({ message: "Invalid unlike data" });
+        return next(new BadRequestError("Invalid item ID"));
       }
-      return res.status(STATUS_SERVER_ERROR).send({ message: "Server error" });
+      return next(e);
     });
 };
 
-const deleteItem = (req, res) => {
+const deleteItem = (req, res, next) => {
   const { itemId } = req.params;
   const userId = req.user._id;
 
@@ -89,9 +78,7 @@ const deleteItem = (req, res) => {
     .then((item) => {
       // Check if current user is the owner of the item
       if (item.owner.toString() !== userId) {
-        return res
-          .status(STATUS_FORBIDDEN)
-          .send({ message: "You can only delete your own items" });
+        throw new ForbiddenError("You can only delete your own items");
       }
 
       // If user is the owner, delete the item
@@ -101,14 +88,12 @@ const deleteItem = (req, res) => {
     })
     .catch((e) => {
       if (e.name === "CastError") {
-        return res
-          .status(STATUS_BAD_REQUEST)
-          .send({ message: "Invalid item ID" });
+        return next(new BadRequestError("Invalid item ID"));
       }
       if (e.name === "DocumentNotFoundError") {
-        return res.status(STATUS_NOT_FOUND).send({ message: "Item not found" });
+        return next(new NotFoundError("Item not found"));
       }
-      return res.status(STATUS_SERVER_ERROR).send({ message: "Server error" });
+      return next(e);
     });
 };
 
