@@ -11,8 +11,8 @@ The server handles users, authentication, and clothing items, and exposes a REST
 Check out these videos, where I describe my project
 and some challenges I faced while building it:
 
-- [First Project Pitch Video](https://drive.google.com/file/d/1AuuGBvqa3ktCJwTUsZ8TFXhng1Mc-0TO/view?usp=sharing)
-- [Full-Stack Project Pitch Video](https://drive.google.com/file/d/1f2-4lB4z0NOW_S117X3LNIJZzufis5uj/view?usp=drive_link)
+- [Diego_Navas_ProjectPitch_WTWR_Backend](https://drive.google.com/file/d/1AuuGBvqa3ktCJwTUsZ8TFXhng1Mc-0TO/view?usp=sharing)
+- [Diego_Navas_ProjectPitch_WTWR_FullStack](https://drive.google.com/file/d/1f2-4lB4z0NOW_S117X3LNIJZzufis5uj/view?usp=drive_link)
 
 ---
 
@@ -74,3 +74,4 @@ se_project_express/
 - Backend API domain: https://api.wtrt-demo.heroinewarrior.com
 - Frontend GitHub repository: https://github.com/diegomur09/se_project_react
 - Backend GitHub repository: https://github.com/diegomur09/se_project_express
+
