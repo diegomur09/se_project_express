@@ -5,14 +5,14 @@ The server handles users, authentication, and clothing items, and exposes a REST
 
 ---
 
-## 🎥 Project Walkthrough Video
 
-You can watch a short walkthrough of this project here:
+## Project Pitch Videos
 
-## Project Pitch Video
+Check out these videos, where I describe my project
+and some challenges I faced while building it:
 
-Check out [this video](https://drive.google.com/file/d/1AuuGBvqa3ktCJwTUsZ8TFXhng1Mc-0TO/view?usp=sharing), where I describe my
-project and some challenges I faced while building it.
+- [First Project Pitch Video](https://drive.google.com/file/d/1AuuGBvqa3ktCJwTUsZ8TFXhng1Mc-0TO/view?usp=sharing)
+- [Full-Stack Project Pitch Video](https://drive.google.com/file/d/1f2-4lB4z0NOW_S117X3LNIJZzufis5uj/view?usp=drive_link)
 
 ---
 
@@ -68,3 +68,9 @@ se_project_express/
 ├── package.json
 └── package-lock.json
 ```
+## Deployment
+
+- Frontend domain: https://wtrt-demo.heroinewarrior.com
+- Backend API domain: https://api.wtrt-demo.heroinewarrior.com
+- Frontend GitHub repository: https://github.com/diegomur09/se_project_react
+- Backend GitHub repository: https://github.com/diegomur09/se_project_express
